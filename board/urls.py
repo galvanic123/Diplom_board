@@ -11,5 +11,5 @@ urlpatterns = [
     path('ad/<int:pk>/edit/', views.AdUpdateView.as_view(), name='ad_edit'),
     path('ad/<int:pk>/delete/', views.AdDeleteView.as_view(), name='ad_delete'),
     path('ad/<int:pk>/comment/', views.add_comment, name='add_comment'),
-    # path('my-ads/', views.UserAdsListView.as_view(), name='user_ads'),
+    path('my-ads/', views.UserAdsListView.as_view(), name='user_ads'),
 ]

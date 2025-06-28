@@ -89,3 +89,12 @@ def add_comment(request, pk):
             comment.save()
             messages.success(request, 'Комментарий добавлен!')
     return redirect('ad_detail', pk=ad.pk)
+
+
+class UserAdsListView(LoginRequiredMixin, ListView):  # Правильное наследование
+    model = Advertisement
+    template_name = 'board/user_ads.html'
+    context_object_name = 'ads'
+
+    def get_queryset(self):
+        return Advertisement.objects.filter(author=self.request.user)

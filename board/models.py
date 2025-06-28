@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.utils.timezone import now
 
 from config import settings
 
@@ -8,6 +9,7 @@ from config import settings
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
+    created_at = models.DateTimeField(default=now, editable=False)  # Добавляем поле
 
     def __str__(self):
         return self.name
