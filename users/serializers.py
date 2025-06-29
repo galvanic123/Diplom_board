@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
-from board.models import Review
+from board.models import Comment
 from board.paginators import ADSPagination
-from board.serializers import AnnouncementSerializer, ReviewSerializer
+from board.serializers import AdvertisementSerializer, CommentSerializer
 
 from .models import User
 
@@ -18,8 +18,8 @@ class CreateUserSerializer(serializers.ModelSerializer):
 class ProfileUserSerializer(serializers.ModelSerializer):
     """Сериализатор для владельца профиля"""
 
-    announcements = AnnouncementSerializer(many=True, read_only=True)
-    author_reviews = ReviewSerializer(many=True, read_only=True)
+    advertisements = AdvertisementSerializer(many=True, read_only=True)
+    author_reviews = CommentSerializer(many=True, read_only=True)
     received_reviews = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
 
@@ -33,7 +33,7 @@ class ProfileUserSerializer(serializers.ModelSerializer):
             "last_name",
             "phone_number",
             "avatar",
-            "announcements",
+            "advertisements",
             "author_reviews",
             "received_reviews",
             "average_rating",
@@ -41,20 +41,20 @@ class ProfileUserSerializer(serializers.ModelSerializer):
 
     def get_received_reviews(self, obj):
         """Получаем оставленные отзывы"""
-        announcements = obj.announcements.all()
-        reviews = Review.objects.filter(announcement__in=announcements)
+        advertisements = obj.advertisements.all()
+        reviews = Comment.objects.filter(advertisement__in=advertisements)
 
         paginator = ADSPagination()
         paginated_reviews = paginator.paginate_queryset(
             reviews, self.context["request"]
         )
 
-        return ReviewSerializer(paginated_reviews, many=True).data
+        return CommentSerializer(paginated_reviews, many=True).data
 
     def get_average_rating(self, obj):
         """Получаем общий рейтинг"""
-        announcements = obj.announcements.all()
-        reviews = Review.objects.filter(announcement__in=announcements)
+        advertisements = obj.advertisements.all()
+        reviews = Comment.objects.filter(advertisement__in=advertisements)
 
         if reviews.exists():
             total_rating = sum(review.rating for review in reviews)
@@ -66,7 +66,7 @@ class ProfileUserSerializer(serializers.ModelSerializer):
 class ProfileOwnerAdSerializer(serializers.ModelSerializer):
     """Сериализатор для пользователей, не являющихся владельцами профиля"""
 
-    announcements = AnnouncementSerializer(many=True, read_only=True)
+    advertisements = AdvertisementSerializer(many=True, read_only=True)
     reviews = serializers.SerializerMethodField()
     overall_rating = serializers.SerializerMethodField()
 
@@ -76,26 +76,26 @@ class ProfileOwnerAdSerializer(serializers.ModelSerializer):
             "first_name",
             "phone_number",
             "avatar",
-            "announcements",
-            "reviews",
+            "advertisements",
+            "comments",
             "overall_rating",
         )
 
     def get_reviews(self, obj):
         """Получаем оставленные отзывы"""
-        announcements = obj.announcements.all()
-        reviews = Review.objects.filter(announcement__in=announcements)
+        advertisements = obj.advertisements.all()
+        reviews = Comment.objects.filter(advertisement__in=advertisements)
 
         paginator = ADSPagination()
         paginated_reviews = paginator.paginate_queryset(
             reviews, self.context["request"]
         )
-        return ReviewSerializer(paginated_reviews, many=True).data
+        return CommentSerializer(paginated_reviews, many=True).data
 
     def get_overall_rating(self, obj):
         """Получаем общий рейтинг"""
-        announcements = obj.announcements.all()
-        reviews = Review.objects.filter(announcement__in=announcements)
+        advertisements = obj.advertisements.all()
+        reviews = Comment.objects.filter(advertisement__in=advertisements)
 
         if reviews.exists():
             total_rating = sum(review.rating for review in reviews)

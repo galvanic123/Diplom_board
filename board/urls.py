@@ -10,13 +10,13 @@ app_name = BoardConfig.name
 
 
 router = DefaultRouter()
-router.register(r"announcement", AdvertisementViewSet, basename="announcement")
+router.register(r"advertisement", AdvertisementViewSet, basename="advertisements")
 
 urlpatterns = [
-    path("review_create/", CommentCreateAPIView.as_view(), name="review_create"),
-    path("review/<int:pk>/update", CommentUpdateAPIView.as_view(), name="review_update"),
-    path("review_list/", CommentListAPIView.as_view(), name="review_list"),
+    path("comment_create/", CommentCreateAPIView.as_view(), name="comment_create"),
+    path("comment/<int:pk>/update", CommentUpdateAPIView.as_view(), name="comment_update"),
+    path("comment_list/", CommentListAPIView.as_view(), name="comment_list"),
     path(
-        "review/<int:pk>/delete", CommentDestroyAPIView.as_view(), name="review_delete"
+        "comment/<int:pk>/delete", CommentDestroyAPIView.as_view(), name="comment_delete"
     ),
 ] + router.urls

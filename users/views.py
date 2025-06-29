@@ -1,93 +1,187 @@
-from rest_framework import generics, status
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.contrib.auth import get_user_model
+import secrets
+
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
-from django.urls import reverse
-from django.conf import settings
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import (
-    UserSerializer,
-    MyTokenObtainPairSerializer,
-    PasswordResetSerializer,
-    PasswordResetConfirmSerializer
+from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status, viewsets
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from board.paginators import ADSPagination
+from config.settings import EMAIL_HOST_USER
+from users.models import User
+from users.permissions import IsModer, IsUser
+from users.serializers import (CreateUserSerializer, ProfileOwnerAdSerializer,
+                               ProfileUserSerializer)
+
+
+@method_decorator(
+    name="create",
+    decorator=swagger_auto_schema(
+        operation_description="Представление создания пользователя"
+    ),
 )
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+class UserCreateAPIView(CreateAPIView):
+    """Контроллер для создания пользователя"""
 
-User = get_user_model()
-
-
-class UserCreateView(generics.CreateAPIView):
+    serializer_class = CreateUserSerializer
     queryset = User.objects.all()
-    serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
+    def perform_create(self, serializer):
+        """Создание пользователя и активация УЗ"""
 
-class MyTokenObtainPairView(TokenObtainPairView):
-    serializer_class = MyTokenObtainPairSerializer
+        user = serializer.save()
+        user.is_active = False
+        user.set_password(user.password)
+        token = secrets.token_hex(16)
+        user.token = token
+        host = self.request.get_host()
+        url = f"http://{host}/users/email-confirm/{token}"
+        user.save(update_fields=["token", "is_active", "password"])
+        send_mail(
+            subject="Активация учетной записи",
+            message=f"Для активации учетной записи пройдите по ссылке {url}",
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[user.email],
+        )
 
 
-class PasswordResetView(generics.GenericAPIView):
-    serializer_class = PasswordResetSerializer
+class EmailConfirmAPIView(APIView):
+    """Представление для подтверждения email-адреса пользователя"""
+
+    def get(self, request, token):
+        """Подтверждение email-адреса пользователя"""
+
+        user = get_object_or_404(User, token=token)
+        user.is_active = True
+        user.save(update_fields=["is_active"])
+        return Response(
+            {"message": "Ваша учетная запись подтверждена!"}, status=status.HTTP_200_OK
+        )
+
+
+class PasswordResetAPIView(APIView):
+    """Контроллер для сброса пароля"""
+
     permission_classes = [AllowAny]
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data['email']
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response(
+                {"error": "Требуется электронная почта."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({'detail': 'Пользователь с таким email не найден.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+        except ObjectDoesNotExist:
+            return Response(
+                {
+                    "error": "Пользователь с таким адресом электронной почты не существует."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
-        # Генерируем токен и uid
-        token = default_token_generator.make_token(user)
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        uid = user.pk
+        token = user.token
+        host = self.request.get_host()
 
-        # Формируем ссылку для сброса пароля
-        reset_url = reverse(
-            'password_reset_confirm',
-            kwargs={'uidb64': uid, 'token': token}
+        reset_link = f"http://{host}/users/reset_password_confirm/{uid}/{token}/"
+
+        send_mail(
+            subject="Сброс пароля",
+            message=f"Для сброса пароля перейдите по следующей ссылке: {reset_link}",
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[user.email],
         )
-
-        # Полный URL (включая домен)
-        full_reset_url = f"{settings.FRONTEND_URL}{reset_url}"
-
-        # Отправляем письмо
-        subject = 'Сброс пароля'
-        message = f'Для сброса пароля перейдите по ссылке: {full_reset_url}'
-        send_mail(subject, message, settings.EMAIL_HOST_USER, [email])
-
-        return Response({'detail': 'Письмо с инструкциями по сбросу пароля отправлено на ваш email.'})
-
-
-class PasswordResetConfirmView(generics.GenericAPIView):
-    serializer_class = PasswordResetConfirmSerializer
-    permission_classes = [AllowAny]
-
-    def post(self, request, uidb64, token, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        # Валидация и смена пароля
-        new_password = serializer.validated_data['new_password']
-
-        try:
-            uid = urlsafe_base64_decode(uidb64).decode()
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
-
-        if user is not None and default_token_generator.check_token(user, token):
-            user.set_password(new_password)
-            user.save()
-            return Response({'detail': 'Пароль успешно изменен.'})
 
         return Response(
-            {'detail': 'Неверная ссылка для сброса пароля.'},
-            status=status.HTTP_400_BAD_REQUEST
+            {"message": "Ссылка для сброса пароля отправлена на ваш email."},
+            status=status.HTTP_200_OK,
         )
+
+
+class PasswordResetConfirmAPIView(APIView):
+    """Контроллер для подтверждения сброса пароля"""
+
+    permission_classes = [AllowAny]
+
+    def post(self, request, uid, token):
+        password = request.data.get("password")
+        if not password:
+            return Response(
+                {"error": "Требуется ввести пароль."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = get_object_or_404(User, pk=uid)
+
+        if user is not None and user.token == token:
+            user.set_password(password)
+            user.token = secrets.token_hex(16)
+            user.save()
+            return Response(
+                {"message": "Пароль успешно изменен."}, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"error": "Ссылка для сброса пароля недействительна."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+@method_decorator(
+    name="retrieve",
+    decorator=swagger_auto_schema(
+        operation_description="Представление просмотра конкретного пользователя"
+    ),
+)
+@method_decorator(
+    name="update",
+    decorator=swagger_auto_schema(
+        operation_description="Представление изменения пользователя"
+    ),
+)
+@method_decorator(
+    name="partial_update",
+    decorator=swagger_auto_schema(
+        operation_description="Представление частичного изменения пользователя"
+    ),
+)
+@method_decorator(
+    name="destroy",
+    decorator=swagger_auto_schema(
+        operation_description="Представление удаления пользователя"
+    ),
+)
+class UserProfileViewSet(viewsets.ModelViewSet):
+    """Контроллер просмотра профиля пользователя"""
+
+    queryset = User.objects.all()
+    pagination_class = ADSPagination
+
+    def get_permissions(self):
+        if self.action == "retrieve":
+            self.permission_classes = [AllowAny]
+        if self.action in ("update", "partial_update", "destroy"):
+            self.permission_classes = (IsUser | IsModer,)
+        return super().get_permissions()
+
+    def get_serializer_class(self):
+        if self.request.user.is_staff:
+            return ProfileUserSerializer
+        if self.request.user.id == self.get_object().id:
+            return ProfileUserSerializer
+        return ProfileOwnerAdSerializer
+
+    def get_queryset(self):
+        return User.objects.all()
+
+    def perform_update(self, serializer):
+        serializer.save()

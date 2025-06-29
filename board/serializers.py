@@ -11,7 +11,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ("id", "text", "rating", "created_at", "announcement", "owner")
+        fields = ("id", "text", "rating", "created_at", "advertisement", "owner")
         validators = [ForbiddenWordValidator(review_text="text")]
 
 
