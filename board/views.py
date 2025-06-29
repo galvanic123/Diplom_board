@@ -1,100 +1,130 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib import messages
-from django.urls import reverse_lazy
-from .models import Advertisement, Category, Comment
-from .forms import AdvertisementForm, CommentForm
+from django.utils.decorators import method_decorator
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import filters, generics, viewsets
+from rest_framework.permissions import AllowAny, IsAuthenticated
+
+from board.filters import AdvertisementFilter
+from board.models import Advertisement, Comment
+from board.paginators import ADSPagination
+from board.serializers import (AdvertisementRetrieveSerializer,
+                                       AdvertisementSerializer,
+                                       CommentSerializer)
+from users.permissions import IsModer, IsOwner
 
 
-class AdListView(ListView):
-    model = Advertisement
-    template_name = 'board/ad_list.html'
-    context_object_name = 'ads'
-    paginate_by = 10
+@method_decorator(
+    name="list",
+    decorator=swagger_auto_schema(
+        operation_description="Контроллер для получения списка"
+    ),
+)
+@method_decorator(
+    name="retrieve",
+    decorator=swagger_auto_schema(
+        operation_description="Контроллер для получения конкретной"
+    ),
+)
+@method_decorator(
+    name="create",
+    decorator=swagger_auto_schema(
+        operation_description="Контроллер для создания"
+    ),
+)
+@method_decorator(
+    name="update",
+    decorator=swagger_auto_schema(
+        operation_description="Контроллер для обновления информации"
+    ),
+)
+@method_decorator(
+    name="partial_update",
+    decorator=swagger_auto_schema(
+        operation_description="Контроллер для частичного изменения информации"
+    ),
+)
+@method_decorator(
+    name="destroy",
+    decorator=swagger_auto_schema(
+        operation_description="Контроллер для удаления"
+    ),
+)
+class AdvertisementViewSet(viewsets.ModelViewSet):
+    """CRUD объявлений."""
 
-    def get_queryset(self):
-        queryset = super().get_queryset().filter(is_active=True)
-        category_slug = self.kwargs.get('category_slug')
-        if category_slug:
-            category = get_object_or_404(Category, slug=category_slug)
-            queryset = queryset.filter(category=category)
-        return queryset.order_by('-created_at')
+    queryset = Advertisement.objects.all()
+    pagination_class = ADSPagination
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    filterset_class = AdvertisementFilter
+    filterset_fields = (
+        "owner",
+        "title",
+        "created_at",
+    )
+    search_fields = ("title",)
+    ordering_fields = ("created_at",)
 
+    def perform_create(self, serializer):
+        advertisement = serializer.save()
+        advertisement.owner = self.request.user
+        advertisement.save()
 
-class AdDetailView(DetailView):
-    model = Advertisement
-    template_name = 'board/ad_detail.html'
-    context_object_name = 'ad'
+    def get_serializer_class(self):
+        """Выбор сериализатора в зависимости от действия."""
+        if self.action == "retrieve":
+            return AdvertisementRetrieveSerializer
+        return AdvertisementSerializer
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['comment_form'] = CommentForm()
-        return context
+    def get_permissions(self):
+        if self.action == "list":
+            self.permission_classes = [AllowAny]
+        elif self.action == "create":
+            self.permission_classes = [IsAuthenticated]
+        elif self.action in "retrieve":
+            self.permission_classes = [IsAuthenticated | IsModer | IsOwner]
+        elif self.action in ["update", "partial_update", "destroy"]:
+            self.permission_classes = [IsOwner | IsModer]
 
-    def get_object(self, queryset=None):
-        obj = super().get_object(queryset)
-        obj.views += 1
-        obj.save()
-        return obj
-
-
-class AdCreateView(LoginRequiredMixin, CreateView):
-    model = Advertisement
-    form_class = AdvertisementForm
-    template_name = 'board/ad_create.html'
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        messages.success(self.request, 'Объявление успешно создано!')
-        return super().form_valid(form)
-
-
-class AdUpdateView(LoginRequiredMixin, UpdateView):
-    model = Advertisement
-    form_class = AdvertisementForm
-    template_name = 'board/ad_edit.html'
-
-    def form_valid(self, form):
-        messages.success(self.request, 'Объявление успешно обновлено!')
-        return super().form_valid(form)
-
-    def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.author != self.request.user:
-            return redirect('ad_detail', pk=obj.pk)
-        return super().dispatch(request, *args, **kwargs)
-
-
-class AdDeleteView(LoginRequiredMixin, DeleteView):
-    model = Advertisement
-    template_name = 'board/ad_delete.html'
-    success_url = reverse_lazy('ad_list')
-
-    def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.author != self.request.user:
-            return redirect('ad_detail', pk=obj.pk)
-        return super().dispatch(request, *args, **kwargs)
-
-
-def add_comment(request, pk):
-    ad = get_object_or_404(Advertisement, pk=pk)
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.ad = ad
-            comment.author = request.user
-            comment.save()
-            messages.success(request, 'Комментарий добавлен!')
-    return redirect('ad_detail', pk=ad.pk)
+        return super().get_permissions()
 
 
-class UserAdsListView(LoginRequiredMixin, ListView):  # Правильное наследование
-    model = Advertisement
-    template_name = 'board/user_ads.html'
-    context_object_name = 'ads'
+class CommentCreateAPIView(generics.CreateAPIView):
+    """Создание отзыва."""
 
-    def get_queryset(self):
-        return Advertisement.objects.filter(author=self.request.user)
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def perform_create(self, serializer):
+        comment = serializer.save()
+        comment.owner = self.request.user
+        comment.save()
+
+
+class CommentListAPIView(generics.ListAPIView):
+    """Список отзывов."""
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    pagination_class = ADSPagination
+    permission_classes = [AllowAny]
+
+
+class CommentUpdateAPIView(generics.UpdateAPIView):
+    """Редактирование отзыва."""
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsOwner | IsModer]
+
+
+class CommentDestroyAPIView(generics.DestroyAPIView):
+    """Удаление отзыва."""
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsOwner | IsModer]

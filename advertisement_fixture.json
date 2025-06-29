@@ -1,0 +1,66 @@
+[
+{
+    "model": "board.advertisement",
+    "pk": 1,
+    "fields": {
+        "title": "ВАЗ 2101",
+        "description": "ВАЗ 2101 1982 года, в отличном состоянии",
+        "price": "100000.00",
+        "category": 4,
+        "author": 1,
+        "created_at": "2025-06-28T16:15:32Z",
+        "updated_at": "2025-06-28T16:22:11.037Z",
+        "is_active": true,
+        "image": "ads_images/VAZ2101.png",
+        "views": 0
+    }
+},
+{
+    "model": "board.advertisement",
+    "pk": 2,
+    "fields": {
+        "title": "Джинсы",
+        "description": "Фирменные джинсы НОНЭЙМ",
+        "price": "100.00",
+        "category": 7,
+        "author": 1,
+        "created_at": "2025-06-28T16:29:46Z",
+        "updated_at": "2025-06-28T16:32:25.966Z",
+        "is_active": true,
+        "image": "ads_images/dginsa_dbfAx4F.webp",
+        "views": 0
+    }
+},
+{
+    "model": "board.advertisement",
+    "pk": 3,
+    "fields": {
+        "title": "Плеер mp3",
+        "description": "Компактный плеер китайский mp3",
+        "price": "25.00",
+        "category": 6,
+        "author": 1,
+        "created_at": "2025-06-28T16:32:36Z",
+        "updated_at": "2025-06-28T16:34:27.942Z",
+        "is_active": true,
+        "image": "",
+        "views": 0
+    }
+},
+{
+    "model": "board.advertisement",
+    "pk": 4,
+    "fields": {
+        "title": "Дворник",
+        "description": "Требуется дворни для работы круглосуточно",
+        "price": "100.00",
+        "category": 5,
+        "author": 4,
+        "created_at": "2025-06-29T11:05:28Z",
+        "updated_at": "2025-06-29T11:06:11.591Z",
+        "is_active": true,
+        "image": "",
+        "views": 0
+    }
+}
+]

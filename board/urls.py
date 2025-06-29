@@ -1,15 +1,22 @@
 from django.urls import path
-from . import views
+from rest_framework.routers import DefaultRouter
 
-app_name = "board"
+from board.apps import BoardConfig
+from board.views import (AdvertisementViewSet, CommentCreateAPIView,
+                                 CommentDestroyAPIView, CommentListAPIView,
+                                 CommentUpdateAPIView)
+
+app_name = BoardConfig.name
+
+
+router = DefaultRouter()
+router.register(r"announcement", AdvertisementViewSet, basename="announcement")
 
 urlpatterns = [
-    path('', views.AdListView.as_view(), name='ad_list'),
-    path('category/<slug:category_slug>/', views.AdListView.as_view(), name='ad_list_by_category'),
-    path('ad/<int:pk>/', views.AdDetailView.as_view(), name='ad_detail'),
-    path('ad/new/', views.AdCreateView.as_view(), name='ad_create'),
-    path('ad/<int:pk>/edit/', views.AdUpdateView.as_view(), name='ad_edit'),
-    path('ad/<int:pk>/delete/', views.AdDeleteView.as_view(), name='ad_delete'),
-    path('ad/<int:pk>/comment/', views.add_comment, name='add_comment'),
-    path('my-ads/', views.UserAdsListView.as_view(), name='user_ads'),
-]
+    path("review_create/", CommentCreateAPIView.as_view(), name="review_create"),
+    path("review/<int:pk>/update", CommentUpdateAPIView.as_view(), name="review_update"),
+    path("review_list/", CommentListAPIView.as_view(), name="review_list"),
+    path(
+        "review/<int:pk>/delete", CommentDestroyAPIView.as_view(), name="review_delete"
+    ),
+] + router.urls

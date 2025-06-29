@@ -16,7 +16,8 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, verbose_name='Имя')
     last_name = models.CharField(max_length=50, verbose_name='Фамилия')
     role = models.CharField(max_length=10, choices=ROLES, default='user', verbose_name='Роль')
-    image = models.ImageField(upload_to='users/', blank=True, null=True, verbose_name='Аватар')
+    image = models.ImageField(upload_to='photo/', blank=True, null=True, verbose_name='Аватар')
+    token = models.CharField(max_length=100, verbose_name='Токен пользователя', blank=True, null=True)
 
     # Указываем, что email — поле для входа
     USERNAME_FIELD = 'email'

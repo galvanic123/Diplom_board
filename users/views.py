@@ -1,29 +1,93 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout
-from .forms import LoginForm, RegisterForm
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.urls import reverse
+from django.conf import settings
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import (
+    UserSerializer,
+    MyTokenObtainPairSerializer,
+    PasswordResetSerializer,
+    PasswordResetConfirmSerializer
+)
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
-def login_view(request):
-    if request.method == 'POST':
-        form = LoginForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('ad_list')  # Перенаправляем на главную
-    else:
-        form = LoginForm()
-    return render(request, 'users/login.html', {'form': form})
+User = get_user_model()
 
-def register_view(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('ad_list')
-    else:
-        form = RegisterForm()
-    return render(request, 'users/register.html', {'form': form})
 
-def logout_view(request):
-    logout(request)
-    return redirect('ad_list')
+class UserCreateView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+
+class PasswordResetView(generics.GenericAPIView):
+    serializer_class = PasswordResetSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'detail': 'Пользователь с таким email не найден.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Генерируем токен и uid
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+        # Формируем ссылку для сброса пароля
+        reset_url = reverse(
+            'password_reset_confirm',
+            kwargs={'uidb64': uid, 'token': token}
+        )
+
+        # Полный URL (включая домен)
+        full_reset_url = f"{settings.FRONTEND_URL}{reset_url}"
+
+        # Отправляем письмо
+        subject = 'Сброс пароля'
+        message = f'Для сброса пароля перейдите по ссылке: {full_reset_url}'
+        send_mail(subject, message, settings.EMAIL_HOST_USER, [email])
+
+        return Response({'detail': 'Письмо с инструкциями по сбросу пароля отправлено на ваш email.'})
+
+
+class PasswordResetConfirmView(generics.GenericAPIView):
+    serializer_class = PasswordResetConfirmSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, uidb64, token, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Валидация и смена пароля
+        new_password = serializer.validated_data['new_password']
+
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        if user is not None and default_token_generator.check_token(user, token):
+            user.set_password(new_password)
+            user.save()
+            return Response({'detail': 'Пароль успешно изменен.'})
+
+        return Response(
+            {'detail': 'Неверная ссылка для сброса пароля.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
