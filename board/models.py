@@ -34,7 +34,7 @@ class Comment(models.Model):
     ad = models.ForeignKey(Advertisement, on_delete=models.CASCADE, related_name='comments')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField(verbose_name="Текст отзыва")
-    created_at = models.DateTimeField(default=timezone.now, auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
     rating = models.IntegerField(verbose_name="Оценка", help_text="Оцените объявление от 1 до 5",
         choices=[(i, str(i)) for i in range(1, 6)],)
 

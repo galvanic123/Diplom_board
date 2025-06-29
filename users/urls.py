@@ -1,13 +1,16 @@
-from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
-from .views import (
-    UserCreateView,
-    MyTokenObtainPairView,
-    PasswordResetView,
-    PasswordResetConfirmView
-)
+from django.urls import include, path
+from rest_framework.permissions import AllowAny
+from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import (TokenObtainPairView,
+                                            TokenRefreshView)
+
+from users.apps import UsersConfig
+from users.views import (EmailConfirmAPIView, PasswordResetAPIView,
+                         PasswordResetConfirmAPIView, UserCreateAPIView,
+                         UserProfileViewSet)
 
 app_name = UsersConfig.name
+
 
 router = DefaultRouter()
 router.register(r"profile", UserProfileViewSet, basename="user-profile")
