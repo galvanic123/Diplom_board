@@ -11,7 +11,10 @@ class ForbiddenWordValidator:
     __slots__ = ("advertisement_title", "advertisement_description", "comment_text")
 
     def __init__(
-        self, advertisement_title=None, advertisement_description=None, comment_text=None
+        self,
+        advertisement_title=None,
+        advertisement_description=None,
+        comment_text=None,
     ):
         self.advertisement_title = advertisement_title
         self.advertisement_description = advertisement_description
@@ -54,7 +57,9 @@ class RepeatAdvertisementValidator(ForbiddenWordValidator):
     __slots__ = ("title", "description", "price")
 
     def __init__(self, title, description, price):
-        super().__init__(advertisement_title=title, advertisement_description=description)
+        super().__init__(
+            advertisement_title=title, advertisement_description=description
+        )
         self.price = price
 
     def __call__(self, value):
@@ -72,4 +77,4 @@ def price_zero_validator(value):
     """Валидатор для проверки цены объявления равной нулю"""
 
     if not value:
-        raise ValidationError("Цена объявления не может быть равна нулю")
+        raise ValidationError("Цена объявления не может быть пустая")

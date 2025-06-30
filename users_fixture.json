@@ -4,7 +4,7 @@
     "pk": 1,
     "fields": {
         "password": "pbkdf2_sha256$1000000$DY7OX6AkzzY8ys763ft4ev$aPR3MNiK0FlmDNdvlYjJBtgCfRgJ+8OFoBFKXadYI6s=",
-        "last_login": "2025-06-29T11:12:19.420Z",
+        "last_login": "2025-06-29T18:09:40.369Z",
         "is_superuser": true,
         "is_staff": true,
         "is_active": true,
@@ -15,7 +15,10 @@
         "last_name": "Достоевский",
         "role": "user",
         "image": "",
-        "groups": [],
+        "token": null,
+        "groups": [
+            2
+        ],
         "user_permissions": []
     }
 },
@@ -24,7 +27,7 @@
     "pk": 2,
     "fields": {
         "password": "pbkdf2_sha256$1000000$yAeIpDnZd63krtPfr5QIa0$drNfGR0+b8MKkt7qeI/62WgbC8OrBk3+N44whTB4Ohg=",
-        "last_login": "2025-06-29T10:23:59.215Z",
+        "last_login": "2025-06-29T10:23:59Z",
         "is_superuser": false,
         "is_staff": false,
         "is_active": true,
@@ -35,7 +38,11 @@
         "last_name": "Савицкий",
         "role": "user",
         "image": "",
-        "groups": [],
+        "token": null,
+        "groups": [
+            1,
+            2
+        ],
         "user_permissions": [
             21,
             23,
@@ -52,18 +59,21 @@
     "pk": 3,
     "fields": {
         "password": "pbkdf2_sha256$1000000$dzxV83BnhqE5BpQwHZbVCO$RRSbfGgdVFvFkW1tk8N61KEijcx1ItbIvjXVmmAZWdg=",
-        "last_login": "2025-06-28T19:56:52.201Z",
+        "last_login": "2025-06-28T19:56:52Z",
         "is_superuser": false,
         "is_staff": false,
         "is_active": true,
-        "date_joined": "2025-06-28T19:56:50.157Z",
+        "date_joined": "2025-06-28T19:56:50Z",
         "email": "sytorminaanna@mail.ru",
         "phone": "+79313447793",
         "first_name": "Anna",
         "last_name": "Sutormina",
         "role": "user",
         "image": "",
-        "groups": [],
+        "token": null,
+        "groups": [
+            3
+        ],
         "user_permissions": []
     }
 },
@@ -83,6 +93,7 @@
         "last_name": "Anna",
         "role": "user",
         "image": "",
+        "token": null,
         "groups": [],
         "user_permissions": []
     }

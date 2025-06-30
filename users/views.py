@@ -15,8 +15,11 @@ from board.paginators import ADSPagination
 from config.settings import EMAIL_HOST_USER
 from users.models import User
 from users.permissions import IsModer, IsUser
-from users.serializers import (CreateUserSerializer, ProfileOwnerAdSerializer,
-                               ProfileUserSerializer)
+from users.serializers import (
+    CreateUserSerializer,
+    ProfileOwnerAdSerializer,
+    ProfileUserSerializer,
+)
 
 
 @method_decorator(

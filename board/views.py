@@ -7,9 +7,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from board.filters import AdvertisementFilter
 from board.models import Advertisement, Comment
 from board.paginators import ADSPagination
-from board.serializers import (AdvertisementRetrieveSerializer,
-                                       AdvertisementSerializer,
-                                       CommentSerializer)
+from board.serializers import (
+    AdvertisementRetrieveSerializer,
+    AdvertisementSerializer,
+    CommentSerializer,
+)
 from users.permissions import IsModer, IsOwner
 
 
@@ -27,9 +29,7 @@ from users.permissions import IsModer, IsOwner
 )
 @method_decorator(
     name="create",
-    decorator=swagger_auto_schema(
-        operation_description="Контроллер для создания"
-    ),
+    decorator=swagger_auto_schema(operation_description="Контроллер для создания"),
 )
 @method_decorator(
     name="update",
@@ -45,9 +45,7 @@ from users.permissions import IsModer, IsOwner
 )
 @method_decorator(
     name="destroy",
-    decorator=swagger_auto_schema(
-        operation_description="Контроллер для удаления"
-    ),
+    decorator=swagger_auto_schema(operation_description="Контроллер для удаления"),
 )
 class AdvertisementViewSet(viewsets.ModelViewSet):
     """CRUD объявлений."""

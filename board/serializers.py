@@ -1,9 +1,11 @@
 from rest_framework import serializers
 
 from .models import Advertisement, Comment
-from .validators.validators import (ForbiddenWordValidator,
-                                    RepeatAdvertisementValidator,
-                                    price_zero_validator)
+from .validators.validators import (
+    ForbiddenWordValidator,
+    RepeatAdvertisementValidator,
+    price_zero_validator,
+)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -11,8 +13,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ("id", "text", "rating", "created_at", "advertisement", "owner")
-        validators = [ForbiddenWordValidator(comment_text="text")]
+        fields = ("id", "comment_text", "rating", "created_at", "ad", "owner")
+        validators = [ForbiddenWordValidator(comment_text="comment_text")]
 
 
 class AdvertisementSerializer(serializers.ModelSerializer):

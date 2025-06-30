@@ -23,7 +23,7 @@ class Advertisement(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
-    image = models.ImageField(upload_to='ads_images/', null=True, blank=True)
+    image = models.ImageField(upload_to="ads_images/", null=True, blank=True)
     views = models.PositiveIntegerField(default=0)
 
     def __str__(self):
@@ -31,16 +31,20 @@ class Advertisement(models.Model):
 
 
 class Comment(models.Model):
-    ad = models.ForeignKey(Advertisement, on_delete=models.CASCADE, related_name='comments')
+    ad = models.ForeignKey(
+        Advertisement, on_delete=models.CASCADE, related_name="comments"
+    )
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField(verbose_name="Текст отзыва")
     created_at = models.DateTimeField(default=timezone.now)
-    rating = models.IntegerField(verbose_name="Оценка", help_text="Оцените объявление от 1 до 5",
-        choices=[(i, str(i)) for i in range(1, 6)],)
-
+    rating = models.IntegerField(
+        verbose_name="Оценка",
+        help_text="Оцените объявление от 1 до 5",
+        choices=[(i, str(i)) for i in range(1, 6)],
+    )
 
     def __str__(self):
-        return f'Comment by {self.owner} on {self.ad}'
+        return f"Comment by {self.owner} on {self.ad}"
 
     class Meta:
         verbose_name = "Отзыв"
