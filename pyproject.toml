@@ -7,9 +7,25 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-dotenv = "^0.9.9"
-django = "^5.2.3"
-drf-yasg = "^1.21.10"
+django = "^5.1.4"
+redis = "^6.2.0"
+black = "^25.1.0"
+python-dotenv = "^1.0.1"
+psycopg2-binary = "^2.9.10"
+flake8 = "^7.1.1"
+djangorestframework = "^3.15.2"
+django-filter = "^25.1"
+djangorestframework-simplejwt = "^5.4.0"
+ipython = "^9.3.0"
+coverage = "^7.6.10"
+isort = "^6.0.1"
+drf-yasg = "^1.21.8"
+stripe = "^12.2.0"
+pillow = "^11.0.0"
+pytest = "^8.3.4"
+pytest-django = "^4.9.0"
+pytest-cov = "^6.0.0"
+django-cors-headers = "^4.6.0"
 
 
 [build-system]

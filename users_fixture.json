@@ -1,0 +1,101 @@
+[
+{
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$1000000$DY7OX6AkzzY8ys763ft4ev$aPR3MNiK0FlmDNdvlYjJBtgCfRgJ+8OFoBFKXadYI6s=",
+        "last_login": "2025-06-29T18:09:40.369Z",
+        "is_superuser": true,
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2025-06-28T15:05:56Z",
+        "email": "savitsky.alexandr@mail.ru",
+        "phone": "+7(967)550-21-05",
+        "first_name": "Александр",
+        "last_name": "Достоевский",
+        "role": "user",
+        "image": "",
+        "token": null,
+        "groups": [
+            2
+        ],
+        "user_permissions": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 2,
+    "fields": {
+        "password": "pbkdf2_sha256$1000000$yAeIpDnZd63krtPfr5QIa0$drNfGR0+b8MKkt7qeI/62WgbC8OrBk3+N44whTB4Ohg=",
+        "last_login": "2025-06-29T10:23:59Z",
+        "is_superuser": false,
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-06-28T16:38:26Z",
+        "email": "kesharic2007@gmail.com",
+        "phone": "8888888888",
+        "first_name": "Иннокентий",
+        "last_name": "Савицкий",
+        "role": "user",
+        "image": "",
+        "token": null,
+        "groups": [
+            1,
+            2
+        ],
+        "user_permissions": [
+            21,
+            23,
+            24,
+            28,
+            29,
+            30,
+            31
+        ]
+    }
+},
+{
+    "model": "users.user",
+    "pk": 3,
+    "fields": {
+        "password": "pbkdf2_sha256$1000000$dzxV83BnhqE5BpQwHZbVCO$RRSbfGgdVFvFkW1tk8N61KEijcx1ItbIvjXVmmAZWdg=",
+        "last_login": "2025-06-28T19:56:52Z",
+        "is_superuser": false,
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-06-28T19:56:50Z",
+        "email": "sytorminaanna@mail.ru",
+        "phone": "+79313447793",
+        "first_name": "Anna",
+        "last_name": "Sutormina",
+        "role": "user",
+        "image": "",
+        "token": null,
+        "groups": [
+            3
+        ],
+        "user_permissions": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 4,
+    "fields": {
+        "password": "pbkdf2_sha256$1000000$WvQSESj5GZhZnML9LYjFbu$2w56WmaqHz4EI4CZyHqWhETZ33spssvn++myjK2Oziw=",
+        "last_login": "2025-06-29T10:27:00.721Z",
+        "is_superuser": false,
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-06-29T10:26:58.637Z",
+        "email": "sav4l@yandex.ru",
+        "phone": "9987754565",
+        "first_name": "Anna",
+        "last_name": "Anna",
+        "role": "user",
+        "image": "",
+        "token": null,
+        "groups": [],
+        "user_permissions": []
+    }
+}
+]
