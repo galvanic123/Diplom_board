@@ -6,30 +6,27 @@ from rest_framework.test import APITestCase
 from users.models import User
 
 
-
-    # url = reverse("users:register")
-    # data = {
-    #     "email": "testnew@test.ru",
-    #     "password": "Qwerty123",
-    #     "first_name": "Test",
-    #     "last_name": "Test",
-    # }
-    # response = client.post(url, data)
-    #
-    # assert response.status_code == status.HTTP_201_CREATED
-    # assert User.objects.count() == 1
-    # user = User.objects.first()
-    # assert user.email == data["email"]
-    # assert user.is_active is False
-    # assert user.check_password(data["password"])
-    # assert user.token is not None
-    #
-    # assert len(mail.outbox) == 1
-    # assert mail.outbox[0].subject == "Активация учетной записи"
-    # assert "Для активации учетной записи пройдите по ссылке" in mail.outbox[0].body
-    # assert user.email in mail.outbox[0].to
-
-
+# url = reverse("users:register")
+# data = {
+#     "email": "testnew@test.ru",
+#     "password": "Qwerty123",
+#     "first_name": "Test",
+#     "last_name": "Test",
+# }
+# response = client.post(url, data)
+#
+# assert response.status_code == status.HTTP_201_CREATED
+# assert User.objects.count() == 1
+# user = User.objects.first()
+# assert user.email == data["email"]
+# assert user.is_active is False
+# assert user.check_password(data["password"])
+# assert user.token is not None
+#
+# assert len(mail.outbox) == 1
+# assert mail.outbox[0].subject == "Активация учетной записи"
+# assert "Для активации учетной записи пройдите по ссылке" in mail.outbox[0].body
+# assert user.email in mail.outbox[0].to
 
 
 @pytest.mark.django_db
@@ -140,15 +137,10 @@ def test_user_retrieve(api_client, user_fixture, user_is_owner_fixture):
 
     # Создаем тестовые данные
     ad = Advertisement.objects.create(
-        owner=user_is_owner_fixture,
-        title="Test Ad",
-        price=100.00
+        owner=user_is_owner_fixture, title="Test Ad", price=100.00
     )
     Comment.objects.create(
-        advertisement=ad,
-        owner=user_fixture,
-        text="Test comment",
-        rating=4
+        advertisement=ad, owner=user_fixture, text="Test comment", rating=4
     )
 
     url = reverse("users:user-profile-detail", kwargs={"pk": user_is_owner_fixture.pk})
@@ -157,8 +149,9 @@ def test_user_retrieve(api_client, user_fixture, user_is_owner_fixture):
     response = api_client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
-    assert 'comments' in response.json()
-    assert len(response.json()['comments']) == 1
+    assert "comments" in response.json()
+    assert len(response.json()["comments"]) == 1
+
 
 @pytest.mark.django_db
 def test_user_delete(api_client, user_fixture, user_is_owner_fixture):
@@ -181,4 +174,3 @@ def test_user_delete(api_client, user_fixture, user_is_owner_fixture):
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert User.objects.count() == 1
-

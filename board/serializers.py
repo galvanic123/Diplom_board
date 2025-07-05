@@ -52,7 +52,9 @@ class AdvertisementSerializer(serializers.ModelSerializer):
         # comments = obj.comments.all()
 
         if comments.exists():
-            return round(sum(comment.rating for comment in comments) / comments.count(), 1)
+            return round(
+                sum(comment.rating for comment in comments) / comments.count(), 1
+            )
         return 0
 
 

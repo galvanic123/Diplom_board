@@ -2,12 +2,14 @@
 
 from django.db import migrations, models
 
+
 def validate_prices(apps, schema_editor):
-    Advertisement = apps.get_model('board', 'Advertisement')
+    Advertisement = apps.get_model("board", "Advertisement")
     for ad in Advertisement.objects.all():
         if ad.price <= 0:
             ad.price = 0.01
             ad.save()
+
 
 class Migration(migrations.Migration):
 

@@ -51,14 +51,24 @@ def test_comment_list(api_client, comment_fixture, user_is_owner_fixture, user_f
 
 
 @pytest.mark.django_db
-def test_comment_update(api_client, comment_fixture, user_is_owner_fixture, user_fixture, advertisement_fixture):
+def test_comment_update(
+    api_client,
+    comment_fixture,
+    user_is_owner_fixture,
+    user_fixture,
+    advertisement_fixture,
+):
     """
     Тест изменения отзыва
     """
 
     url = reverse("advertisement:comment_update", kwargs={"pk": comment_fixture.pk})
 
-    data = {"text": "test text updated", "rating": 4, "advertisement": advertisement_fixture.pk}
+    data = {
+        "text": "test text updated",
+        "rating": 4,
+        "advertisement": advertisement_fixture.pk,
+    }
 
     data_1 = {
         "text": "test text updated",
@@ -89,7 +99,9 @@ def test_comment_update(api_client, comment_fixture, user_is_owner_fixture, user
 
 
 @pytest.mark.django_db
-def test_comment_delete(api_client, comment_fixture, user_is_owner_fixture, user_fixture):
+def test_comment_delete(
+    api_client, comment_fixture, user_is_owner_fixture, user_fixture
+):
     """
     Тест удаления отзыва
     """

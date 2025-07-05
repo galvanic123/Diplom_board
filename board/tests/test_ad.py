@@ -3,7 +3,12 @@ from django.urls import reverse
 from rest_framework import status
 
 from board.models import Advertisement
-from users.tests.conftest import admin_fixture, api_client, user_fixture, user_is_owner_fixture
+from users.tests.conftest import (
+    admin_fixture,
+    api_client,
+    user_fixture,
+    user_is_owner_fixture,
+)
 
 
 @pytest.mark.django_db
@@ -14,7 +19,7 @@ def test_advertisement_create(api_client, user_fixture, category_fixture):
         "title": "title new",
         "description": "description new",
         "price": 100,
-        "category": category_fixture.id  # Добавляем обязательное поле
+        "category": category_fixture.id,  # Добавляем обязательное поле
     }
 
     # Неавторизованный запрос
@@ -38,12 +43,13 @@ def test_advertisement_list(advertisement_fixture, api_client, user_fixture):
 
     # Создаем второе объявление для проверки порядка
     from board.models import Advertisement
+
     Advertisement.objects.create(
         title="Newer Ad",
         description="New description",
         price=200,
         owner=user_fixture,
-        category=advertisement_fixture.category
+        category=advertisement_fixture.category,
     )
 
     response = api_client.get(url)
@@ -55,15 +61,18 @@ def test_advertisement_list(advertisement_fixture, api_client, user_fixture):
     assert results[0]["title"] == "Newer Ad"
     assert results[1]["title"] == "test title"
 
+
 @pytest.mark.django_db
 def test_advertisement_retrieve(
-    api_client, user_is_owner_fixture, user_fixture, advertisement_fixture, admin_fixture
+    api_client,
+    user_is_owner_fixture,
+    user_fixture,
+    advertisement_fixture,
+    admin_fixture,
 ):
     """Тестирование просмотра одного объявления"""
 
-    url = reverse(
-        "board:advertisement-detail", kwargs={"pk": advertisement_fixture.pk}
-    )
+    url = reverse("board:advertisement-detail", kwargs={"pk": advertisement_fixture.pk})
     response = api_client.get(url)
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -87,9 +96,7 @@ def test_advertisement_update(
 ):
     """Тестирование изменения информация в одном объявлении"""
 
-    url = reverse(
-        "board:advertisement-detail", kwargs={"pk": advertisement_fixture.pk}
-    )
+    url = reverse("board:advertisement-detail", kwargs={"pk": advertisement_fixture.pk})
     data = {
         "title": "test_title_updated",
         "price": 200,
@@ -126,9 +133,7 @@ def test_advertisement_delete(
 ):
     """Тестирование удаления объявления"""
 
-    url = reverse(
-        "board:advertisement-detail", kwargs={"pk": advertisement_fixture.pk}
-    )
+    url = reverse("board:advertisement-detail", kwargs={"pk": advertisement_fixture.pk})
     response = api_client.delete(url)
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED

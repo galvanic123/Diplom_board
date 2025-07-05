@@ -17,5 +17,4 @@ class Migration(migrations.Migration):
             name="price",
             field=models.DecimalField(decimal_places=2, max_digits=10),
         ),
-
     ]

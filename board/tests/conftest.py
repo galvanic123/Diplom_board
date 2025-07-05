@@ -6,9 +6,11 @@ from rest_framework.test import APIClient
 
 User = get_user_model()
 
+
 @pytest.fixture
 def category_fixture():
     return Category.objects.create(name="Test Category")
+
 
 @pytest.fixture
 def advertisement_fixture(user_is_owner_fixture):
