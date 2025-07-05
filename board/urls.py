@@ -14,7 +14,7 @@ app_name = BoardConfig.name
 
 
 router = DefaultRouter()
-router.register(r"advertisement", AdvertisementViewSet, basename="advertisements")
+router.register(r"advertisement", AdvertisementViewSet, basename="advertisement")
 
 urlpatterns = [
     path("comment_create/", CommentCreateAPIView.as_view(), name="comment_create"),

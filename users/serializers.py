@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from board.models import Comment
-from board.paginators import ADSPagination
+from board.pagination import ADSPagination
 from board.serializers import AdvertisementSerializer, CommentSerializer
 
 from .models import User
@@ -19,8 +19,8 @@ class ProfileUserSerializer(serializers.ModelSerializer):
     """Сериализатор для владельца профиля"""
 
     advertisements = AdvertisementSerializer(many=True, read_only=True)
-    author_reviews = CommentSerializer(many=True, read_only=True)
-    received_reviews = serializers.SerializerMethodField()
+    author_comments = CommentSerializer(many=True, read_only=True)
+    received_comments = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
 
     class Meta:
@@ -31,34 +31,34 @@ class ProfileUserSerializer(serializers.ModelSerializer):
             "password",
             "first_name",
             "last_name",
-            "phone_number",
-            "avatar",
+            "phone",
+            "image",
             "advertisements",
-            "author_reviews",
-            "received_reviews",
+            "author_comments",
+            "received_comments",
             "average_rating",
         )
 
-    def get_received_reviews(self, obj):
+    def get_received_comments(self, obj):
         """Получаем оставленные отзывы"""
         advertisements = obj.advertisements.all()
-        reviews = Comment.objects.filter(advertisement__in=advertisements)
+        comments = Comment.objects.filter(advertisement__in=advertisements)
 
         paginator = ADSPagination()
-        paginated_reviews = paginator.paginate_queryset(
-            reviews, self.context["request"]
+        paginated_comments = paginator.paginate_queryset(
+            comments, self.context["request"]
         )
 
-        return CommentSerializer(paginated_reviews, many=True).data
+        return CommentSerializer(paginated_comments, many=True).data
 
     def get_average_rating(self, obj):
         """Получаем общий рейтинг"""
         advertisements = obj.advertisements.all()
-        reviews = Comment.objects.filter(advertisement__in=advertisements)
+        comments = Comment.objects.filter(advertisement__in=advertisements)
 
-        if reviews.exists():
-            total_rating = sum(review.rating for review in reviews)
-            average_rating = total_rating / reviews.count()
+        if comments.exists():
+            total_rating = sum(comment.rating for comment in comments)
+            average_rating = total_rating / comments.count()
             return round(average_rating, 2)
         return 0
 
@@ -67,38 +67,38 @@ class ProfileOwnerAdSerializer(serializers.ModelSerializer):
     """Сериализатор для пользователей, не являющихся владельцами профиля"""
 
     advertisements = AdvertisementSerializer(many=True, read_only=True)
-    reviews = serializers.SerializerMethodField()
+    comments = serializers.SerializerMethodField()
     overall_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
             "first_name",
-            "phone_number",
-            "avatar",
+            "phone",
+            "image",
             "advertisements",
             "comments",
             "overall_rating",
         )
 
-    def get_reviews(self, obj):
+    def get_comments(self, obj):
         """Получаем оставленные отзывы"""
         advertisements = obj.advertisements.all()
-        reviews = Comment.objects.filter(advertisement__in=advertisements)
+        comments = Comment.objects.filter(advertisement__in=advertisements)
 
         paginator = ADSPagination()
-        paginated_reviews = paginator.paginate_queryset(
-            reviews, self.context["request"]
+        paginated_comments = paginator.paginate_queryset(
+            comments, self.context["request"]
         )
-        return CommentSerializer(paginated_reviews, many=True).data
+        return CommentSerializer(paginated_comments, many=True).data
 
     def get_overall_rating(self, obj):
         """Получаем общий рейтинг"""
         advertisements = obj.advertisements.all()
-        reviews = Comment.objects.filter(advertisement__in=advertisements)
+        comments = Comment.objects.filter(advertisement__in=advertisements)
 
-        if reviews.exists():
-            total_rating = sum(review.rating for review in reviews)
-            average_rating = total_rating / reviews.count()
+        if comments.exists():
+            total_rating = sum(comment.rating for comment in comments)
+            average_rating = total_rating / comments.count()
             return round(average_rating, 2)
         return 0

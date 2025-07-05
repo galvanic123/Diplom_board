@@ -16,7 +16,7 @@ app_name = UsersConfig.name
 
 
 router = DefaultRouter()
-router.register(r"profile", UserProfileViewSet, basename="user-profile")
+router.register(r"user-profile", UserProfileViewSet, basename="user-profile")
 
 urlpatterns = [
     path(
@@ -42,4 +42,4 @@ urlpatterns = [
         PasswordResetConfirmAPIView.as_view(),
         name="reset_password_confirm",
     ),
-]
+] + router.urls

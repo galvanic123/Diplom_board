@@ -1,14 +1,20 @@
 import pytest
 
-from board.models import Advertisement, Comment
+from board.models import Advertisement, Comment, Category
+from django.contrib.auth import get_user_model
+from rest_framework.test import APIClient
 
+User = get_user_model()
+
+@pytest.fixture
+def category_fixture():
+    return Category.objects.create(name="Test Category")
 
 @pytest.fixture
 def advertisement_fixture(user_is_owner_fixture):
     """
-    фикстура модели Announcement
+    фикстура модели Advertisement
     """
-
     advertisement = Advertisement.objects.create(
         title="test title", price=100, owner=user_is_owner_fixture
     )

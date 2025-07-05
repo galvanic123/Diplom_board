@@ -13,8 +13,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ("id", "comment_text", "rating", "created_at", "ad", "owner")
-        validators = [ForbiddenWordValidator(comment_text="comment_text")]
+        fields = ("id", "text", "rating", "created_at", "owner")
+        validators = [ForbiddenWordValidator(comment_text="text")]
 
 
 class AdvertisementSerializer(serializers.ModelSerializer):
@@ -45,13 +45,14 @@ class AdvertisementSerializer(serializers.ModelSerializer):
         ]
 
     def get_average_rating(self, obj):
-        """Получаем общий рейтинг для данного объявления"""
-        reviews = obj.advertisement_reviews.all()
+        # Вариант 1: Если related_name не указан (используем _set)
+        comments = obj.comments.all()  # Или comment_set, в зависимости от вашей модели
 
-        if reviews.exists():
-            total_rating = sum(review.rating for review in reviews)
-            average_rating = total_rating / reviews.count()
-            return round(average_rating, 2)
+        # Вариант 2: Если указан related_name='comments'
+        # comments = obj.comments.all()
+
+        if comments.exists():
+            return round(sum(comment.rating for comment in comments) / comments.count(), 1)
         return 0
 
 
@@ -70,5 +71,5 @@ class AdvertisementRetrieveSerializer(serializers.ModelSerializer):
             "image",
             "created_at",
             "owner",
-            "advertisement_reviews",
+            "advertisement_comments",
         )

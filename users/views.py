@@ -11,7 +11,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from board.paginators import ADSPagination
+from board.pagination import ADSPagination
 from config.settings import EMAIL_HOST_USER
 from users.models import User
 from users.permissions import IsModer, IsUser

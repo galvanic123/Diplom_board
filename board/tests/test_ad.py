@@ -7,20 +7,26 @@ from users.tests.conftest import admin_fixture, api_client, user_fixture, user_i
 
 
 @pytest.mark.django_db
-def test_advertisement_create(api_client, user_fixture):
-    """Тестирование создание нового объявления"""
+def test_advertisement_create(api_client, user_fixture, category_fixture):
+    """Тестирование создания нового объявления"""
+    url = reverse("board:advertisement-list")
+    data = {
+        "title": "title new",
+        "description": "description new",
+        "price": 100,
+        "category": category_fixture.id  # Добавляем обязательное поле
+    }
 
-    url = reverse("advertisements:advertisement-list")
-    data = {"title": "title new", "description": "description new", "price": 100}
+    # Неавторизованный запрос
     response = api_client.post(url, data)
-
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
+    # Авторизованный запрос
     api_client.force_authenticate(user_fixture)
     response = api_client.post(url, data)
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json()["title"] == "title new"
+    assert response.json()["title"] == data["title"]
     assert Advertisement.objects.count() == 1
     assert Advertisement.objects.first().owner == user_fixture
 
@@ -28,27 +34,35 @@ def test_advertisement_create(api_client, user_fixture):
 @pytest.mark.django_db
 def test_advertisement_list(advertisement_fixture, api_client, user_fixture):
     """Тестирование просмотра списка объявлений"""
+    url = reverse("board:advertisement-list")
 
-    url = reverse("advertisements:advertisement-list")
+    # Создаем второе объявление для проверки порядка
+    from board.models import Advertisement
+    Advertisement.objects.create(
+        title="Newer Ad",
+        description="New description",
+        price=200,
+        owner=user_fixture,
+        category=advertisement_fixture.category
+    )
+
     response = api_client.get(url)
-
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["results"][0]["title"] == "test title"
 
-    api_client.force_authenticate(user_fixture)
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["results"][0]["title"] == "test title"
-
+    # Проверяем порядок (новые первыми)
+    results = response.json()["results"]
+    assert len(results) == 2
+    assert results[0]["title"] == "Newer Ad"
+    assert results[1]["title"] == "test title"
 
 @pytest.mark.django_db
-def advertisement_retrieve(
+def test_advertisement_retrieve(
     api_client, user_is_owner_fixture, user_fixture, advertisement_fixture, admin_fixture
 ):
     """Тестирование просмотра одного объявления"""
 
     url = reverse(
-        "advertisements:advertisement-detail", kwargs={"pk": advertisement_fixture.pk}
+        "board:advertisement-detail", kwargs={"pk": advertisement_fixture.pk}
     )
     response = api_client.get(url)
 
@@ -74,7 +88,7 @@ def test_advertisement_update(
     """Тестирование изменения информация в одном объявлении"""
 
     url = reverse(
-        "advertisements:advertisement-detail", kwargs={"pk": advertisement_fixture.pk}
+        "board:advertisement-detail", kwargs={"pk": advertisement_fixture.pk}
     )
     data = {
         "title": "test_title_updated",
@@ -113,7 +127,7 @@ def test_advertisement_delete(
     """Тестирование удаления объявления"""
 
     url = reverse(
-        "advertisements:advertisement-detail", kwargs={"pk": advertisement_fixture.pk}
+        "board:advertisement-detail", kwargs={"pk": advertisement_fixture.pk}
     )
     response = api_client.delete(url)
 

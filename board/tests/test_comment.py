@@ -1,7 +1,7 @@
 import pytest
+
 from django.urls import reverse
 from rest_framework import status
-
 from board.models import Comment
 from users.tests.conftest import api_client, user_fixture, user_is_owner_fixture
 
@@ -12,7 +12,7 @@ def test_comment_create(api_client, user_fixture, advertisement_fixture):
     Тест создания нового отзыва
     """
 
-    url = reverse("advertisements:comment_create")
+    url = reverse("advertisement:comment_create")
     data = {"text": "new text", "advertisement": advertisement_fixture.pk, "rating": 5}
     response = api_client.post(url, data)
 
@@ -32,7 +32,7 @@ def test_comment_list(api_client, comment_fixture, user_is_owner_fixture, user_f
     """
     Тест получения списка отзывов
     """
-    url = reverse("advertisements:comment_list")
+    url = reverse("advertisement:comment_list")
     response = api_client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
@@ -56,9 +56,9 @@ def test_comment_update(api_client, comment_fixture, user_is_owner_fixture, user
     Тест изменения отзыва
     """
 
-    url = reverse("announcements:review_update", kwargs={"pk": comment_fixture.pk})
+    url = reverse("advertisement:comment_update", kwargs={"pk": comment_fixture.pk})
 
-    data = {"text": "test text updated", "rating": 4, "announcement": advertisement_fixture.pk}
+    data = {"text": "test text updated", "rating": 4, "advertisement": advertisement_fixture.pk}
 
     data_1 = {
         "text": "test text updated",
@@ -94,7 +94,7 @@ def test_comment_delete(api_client, comment_fixture, user_is_owner_fixture, user
     Тест удаления отзыва
     """
 
-    url = reverse("advertisements:review_delete", kwargs={"pk": comment_fixture.pk})
+    url = reverse("board:comment-detail", kwargs={"pk": comment_fixture.pk})
     response = api_client.delete(url)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 

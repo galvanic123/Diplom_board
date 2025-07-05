@@ -28,10 +28,10 @@ class User(AbstractUser):
 
     # Указываем, что email — поле для входа
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["first_name", "last_name", "phone"]
+    REQUIRED_FIELDS = []
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.email})"
+        return self.email
 
     class Meta:
         verbose_name = "Пользователь"

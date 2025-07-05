@@ -18,9 +18,14 @@ class Advertisement(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(default=timezone.now)
+    category = models.ForeignKey(
+        'Category',
+        on_delete=models.SET_NULL,
+        null=True,  # Разрешаем NULL
+        blank=True  # Разрешаем пустое значение в формах
+    )
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='advertisements')
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
     image = models.ImageField(upload_to="ads_images/", null=True, blank=True)
@@ -31,7 +36,7 @@ class Advertisement(models.Model):
 
 
 class Comment(models.Model):
-    ad = models.ForeignKey(
+    advertisement = models.ForeignKey(
         Advertisement, on_delete=models.CASCADE, related_name="comments"
     )
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -44,7 +49,7 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return f"Comment by {self.owner} on {self.ad}"
+        return f"Comment by {self.owner} on {self.advertisement}"
 
     class Meta:
         verbose_name = "Отзыв"

@@ -3,10 +3,10 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, generics, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
-
+from .pagination import ADSPagination
 from board.filters import AdvertisementFilter
 from board.models import Advertisement, Comment
-from board.paginators import ADSPagination
+
 from board.serializers import (
     AdvertisementRetrieveSerializer,
     AdvertisementSerializer,
