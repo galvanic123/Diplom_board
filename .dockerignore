@@ -1,3 +1,8 @@
+**
+
+!users/
+manage.py
+
 .git
 .gitignore
 .env
