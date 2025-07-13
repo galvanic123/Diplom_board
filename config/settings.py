@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import timedelta
 
 from pathlib import Path
@@ -31,6 +32,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "rest_framework_simplejwt",
     "drf_spectacular",
     "drf_yasg",
@@ -177,3 +179,11 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_ALLOW_ALL_ORIGINS = False
 
 SWAGGER_USE_COMPAT_RENDERERS = False
+
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'test_db.sqlite3',
+        }
+    }

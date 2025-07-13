@@ -16,9 +16,7 @@ def user_is_owner_fixture():
     """
     фикстура модели User
     """
-    user = User.objects.create(
-        email="test@test.ru", password="Qwerty", is_active=True
-    )
+    user = User.objects.create(email="test@test.ru", password="Qwerty", is_active=True)
     return user
 
 

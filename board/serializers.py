@@ -13,7 +13,11 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ("id", "text", "rating", "created_at", "owner")
+        fields = ("id", "text", "rating", "created_at", "owner", "advertisement")
+        read_only_fields = ["owner"]
+        extra_kwargs = {
+            'owner': {'read_only': True}
+        }
         validators = [ForbiddenWordValidator(comment_text="text")]
 
 
@@ -34,7 +38,14 @@ class AdvertisementSerializer(serializers.ModelSerializer):
             "created_at",
             "owner",
             "average_rating",
+            'category',
         )
+        read_only_fields = ['owner']
+
+        def create(self, validated_data):
+            validated_data["owner"] = self.context["request"].user
+            return super().create(validated_data)
+
         validators = [
             ForbiddenWordValidator(
                 advertisement_title="title", advertisement_description="description"
@@ -45,21 +56,20 @@ class AdvertisementSerializer(serializers.ModelSerializer):
         ]
 
     def get_average_rating(self, obj):
-        # Вариант 1: Если related_name не указан (используем _set)
-        comments = obj.comments.all()  # Или comment_set, в зависимости от вашей модели
 
-        # Вариант 2: Если указан related_name='comments'
-        # comments = obj.comments.all()
+        comments = obj.comments.all()
 
         if comments.exists():
-            return round(sum(comment.rating for comment in comments) / comments.count(), 1)
+            return round(
+                sum(comment.rating for comment in comments) / comments.count(), 1
+            )
         return 0
 
 
 class AdvertisementRetrieveSerializer(serializers.ModelSerializer):
     """Сериализатор для просмотра одного объявления"""
 
-    advertisement_reviews = CommentSerializer(many=True, read_only=True)
+    advertisement_comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Advertisement
@@ -72,4 +82,5 @@ class AdvertisementRetrieveSerializer(serializers.ModelSerializer):
             "created_at",
             "owner",
             "advertisement_comments",
+            'category',
         )

@@ -9,6 +9,4 @@ class Migration(migrations.Migration):
         ("board", "0007_alter_advertisement_price_and_more"),
     ]
 
-    operations = [
-
-    ]
+    operations = []
