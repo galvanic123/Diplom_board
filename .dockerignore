@@ -1,12 +1,9 @@
-**
-
-!users/
-manage.py
-
 .git
-.gitignore
-.env
-venv
 __pycache__
 *.pyc
+*.pyo
+*.pyd
+.env
+venv
+*.log
 test_db.sqlite

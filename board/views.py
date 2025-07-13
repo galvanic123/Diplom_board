@@ -51,6 +51,7 @@ class AdvertisementViewSet(viewsets.ModelViewSet):
     """CRUD объявлений."""
 
     queryset = Advertisement.objects.all()
+    serializer_class = AdvertisementSerializer
     pagination_class = ADSPagination
     filter_backends = [
         DjangoFilterBackend,
@@ -59,6 +60,7 @@ class AdvertisementViewSet(viewsets.ModelViewSet):
     ]
     filterset_class = AdvertisementFilter
     filterset_fields = (
+        "category__slug",
         "owner",
         "title",
         "created_at",
@@ -67,9 +69,10 @@ class AdvertisementViewSet(viewsets.ModelViewSet):
     ordering_fields = ("created_at",)
 
     def perform_create(self, serializer):
-        advertisement = serializer.save()
-        advertisement.owner = self.request.user
-        advertisement.save()
+        # advertisement = serializer.save()
+        # advertisement.owner = self.request.user
+        # advertisement.save()
+        serializer.save(owner=self.request.user)
 
     def get_serializer_class(self):
         """Выбор сериализатора в зависимости от действия."""
@@ -89,6 +92,11 @@ class AdvertisementViewSet(viewsets.ModelViewSet):
 
         return super().get_permissions()
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
 
 class CommentCreateAPIView(generics.CreateAPIView):
     """Создание отзыва."""
@@ -98,9 +106,10 @@ class CommentCreateAPIView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def perform_create(self, serializer):
-        comment = serializer.save()
-        comment.owner = self.request.user
-        comment.save()
+        serializer.save(owner=self.request.user, advertisement=serializer.validated_data['advertisement'])
+        # comment = serializer.save()
+        # comment.owner = self.request.user
+        # comment.save()
 
 
 class CommentListAPIView(generics.ListAPIView):
@@ -111,6 +120,12 @@ class CommentListAPIView(generics.ListAPIView):
     pagination_class = ADSPagination
     permission_classes = [AllowAny]
 
+# class CommentDetailView(generics.ListAPIView):
+#     """Отзыв."""
+#
+#     queryset = Comment.objects.all()
+#     serializer_class = CommentSerializer
+#     permission_classes = [AllowAny]
 
 class CommentUpdateAPIView(generics.UpdateAPIView):
     """Редактирование отзыва."""

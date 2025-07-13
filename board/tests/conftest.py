@@ -2,13 +2,12 @@ import pytest
 
 from board.models import Advertisement, Comment, Category
 from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient
 
 User = get_user_model()
 
-
 @pytest.fixture
 def category_fixture():
+    from board.models import Category
     return Category.objects.create(name="Test Category")
 
 

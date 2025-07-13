@@ -8,4 +8,4 @@ class AdvertisementFilter(filters.FilterSet):
 
     class Meta:
         model = Advertisement
-        fields = ["title"]
+        fields = ["title", "category"]
