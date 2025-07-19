@@ -69,9 +69,6 @@ class AdvertisementViewSet(viewsets.ModelViewSet):
     ordering_fields = ("created_at",)
 
     def perform_create(self, serializer):
-        # advertisement = serializer.save()
-        # advertisement.owner = self.request.user
-        # advertisement.save()
         serializer.save(owner=self.request.user)
 
     def get_serializer_class(self):
@@ -107,9 +104,6 @@ class CommentCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user, advertisement=serializer.validated_data['advertisement'])
-        # comment = serializer.save()
-        # comment.owner = self.request.user
-        # comment.save()
 
 
 class CommentListAPIView(generics.ListAPIView):
@@ -120,12 +114,6 @@ class CommentListAPIView(generics.ListAPIView):
     pagination_class = ADSPagination
     permission_classes = [AllowAny]
 
-# class CommentDetailView(generics.ListAPIView):
-#     """Отзыв."""
-#
-#     queryset = Comment.objects.all()
-#     serializer_class = CommentSerializer
-#     permission_classes = [AllowAny]
 
 class CommentUpdateAPIView(generics.UpdateAPIView):
     """Редактирование отзыва."""
